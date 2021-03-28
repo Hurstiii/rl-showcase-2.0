@@ -2,7 +2,6 @@ from typing import Dict
 from tornado.escape import json_decode
 import tornado.ioloop
 import tornado.websocket
-import gym
 from n_step_sarsa import NStepSarsa
 from FrozenLakeWrapper import FrozenLakeWrapper
 from utils import setInterval
@@ -25,9 +24,9 @@ messageSchema = {
 # instantiate the default environment.
 class MainHandler(tornado.websocket.WebSocketHandler):
     def __init__(self, *args, **kwargs):
-        self.sim = tornado.ioloop.PeriodicCallback(self.stepAndUpdate, 800)
+        self.sim = tornado.ioloop.PeriodicCallback(self.stepAndUpdate, 200)
         self.simulating = False
-        self.env = FrozenLakeWrapper()
+        self.env = FrozenLakeWrapper(map_name=None, desc=None)
         self.a = NStepSarsa(self.env.env)
         super(MainHandler, self).__init__(*args, **kwargs)
 

@@ -103,6 +103,8 @@ function App() {
         currentSquare = data.stepResults.obs;
       }
 
+      console.log("message recieved");
+
       const extraSquareInfo = () => {
         if (
           currentSquare !== undefined &&
@@ -156,9 +158,6 @@ function App() {
         }
       };
 
-      console.log(data);
-      console.log(currentSquare);
-
       setEnvironment(
         <FrozenLake
           map={data.map}
@@ -169,6 +168,7 @@ function App() {
       ); // sets the environment to be rendered to FrozenLake
 
       setAgentState({ ...data.agentState });
+      console.log(data.agentState);
     }
   };
 
@@ -195,6 +195,7 @@ function App() {
   };
 
   useEffect(() => {
+    console.log("agent state change");
     if (agentState !== undefined) {
       setValues(
         Object.entries(agentState).map(([key, value], i) => {

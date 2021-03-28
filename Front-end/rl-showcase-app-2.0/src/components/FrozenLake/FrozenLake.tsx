@@ -1,7 +1,7 @@
 import React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled, { css } from "styled-components";
-import { Box, makeStyles, Tooltip } from "@material-ui/core";
+import { Box, makeStyles, Theme, Tooltip } from "@material-ui/core";
 
 /**
  * Enum actions for the environment to given them more readability/meaning than just numbers.
@@ -13,16 +13,20 @@ enum Actions {
   Left,
 }
 
-const SquareSize = 150;
-const AgentSize = SquareSize / 2;
-const InfoSize = 38;
-
 /**
  * Styled components.
  */
 const MapWrapper = styled.div`
   display: grid;
-  grid: repeat(4, ${SquareSize}px) / repeat(4, ${SquareSize}px);
+  ${({ SquareSize, mapSize }: { SquareSize: number; mapSize: number }) => {
+    return css`
+      grid: repeat(${mapSize}, ${SquareSize}px) / repeat(
+          ${mapSize},
+          ${SquareSize}px
+        );
+    `;
+  }}
+
   align-items: center;
   justify-items: center;
 `;
@@ -53,10 +57,15 @@ const MapSquare = styled.div`
   }};
 `;
 
-const useStyles = makeStyles({
-  InfoBubble: {
-    width: `${InfoSize}px`,
-    height: `${InfoSize}px`,
+export interface StylesProps {
+  InfoSize: number;
+  SquareSize: number;
+}
+
+const useStyles = makeStyles<Theme, StylesProps>((theme: Theme) => ({
+  InfoBubble: (props) => ({
+    width: `${props.InfoSize}px`,
+    height: `${props.InfoSize}px`,
     background: "#ffffff66",
     borderRadius: "50%",
     display: "flex",
@@ -64,7 +73,7 @@ const useStyles = makeStyles({
     alignItems: "center",
     fontSize: "0.8rem",
     fontWeight: 300,
-  },
+  }),
   InfoBox: {
     position: "absolute",
     justifyContent: "center",
@@ -72,19 +81,19 @@ const useStyles = makeStyles({
     overflow: "hidden",
     transition: "opacity 0.5s ease,left 0.1s ease-in-out, top 0.1s ease-in-out",
   },
-  InfoBoxHorizontal: {
-    maxWidth: `${SquareSize}px`,
-    width: `${SquareSize}px`,
-    height: `${InfoSize}px`,
+  InfoBoxHorizontal: (props) => ({
+    maxWidth: `${props.SquareSize}px`,
+    width: `${props.SquareSize}px`,
+    height: `${props.InfoSize}px`,
     flexDirection: "row",
-  },
-  InfoBoxVertical: {
-    maxHeight: `${SquareSize}px`,
-    height: `${SquareSize}px`,
-    width: `${InfoSize}px`,
+  }),
+  InfoBoxVertical: (props) => ({
+    maxHeight: `${props.SquareSize}px`,
+    height: `${props.SquareSize}px`,
+    width: `${props.InfoSize}px`,
     flexDirection: "column",
-  },
-});
+  }),
+}));
 
 /**
  * Props for the FrozenLake environment.
@@ -127,9 +136,17 @@ const FrozenLake: React.FC<Props> = ({
   extraSquareInfo,
   currentSquare = 0,
 }) => {
-  const classes = useStyles();
+  const mapSize = map.length; // TODO: Calculate the mapSize based on the map prop.
 
-  const mapSize = 4; // TODO: Calculate the mapSize based on the map prop.
+  const SquareSize: number = 600 / mapSize;
+  const AgentSize: number = SquareSize / 2;
+  const InfoSize: number = 38;
+
+  const styleProps: StylesProps = {
+    InfoSize: InfoSize,
+    SquareSize: SquareSize,
+  };
+  const classes = useStyles(styleProps);
 
   const [hideExtraInfo, setHideExtraInfo] = useState(false);
 
@@ -148,10 +165,10 @@ const FrozenLake: React.FC<Props> = ({
           height: "max-content",
         }}
       >
-        <MapWrapper>
+        <MapWrapper SquareSize={SquareSize} mapSize={mapSize}>
           {map.map((line, i) => {
             return line.map((v, ii) => {
-              const gridIndex = i * 4 + ii;
+              const gridIndex = i * mapSize + ii;
               if (v === "H")
                 return (
                   <MapSquare

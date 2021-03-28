@@ -115,6 +115,7 @@ class NStepSarsa():
             self.finished = True
             return
 
+        print("t increase")
         self.t += 1
         self.finished = False
         return
